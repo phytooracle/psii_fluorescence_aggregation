@@ -140,7 +140,7 @@ def generate_flurorescence(df):
             continue
 
         # extracting image number from the label string and converting it to an int for filtering
-        df['img_num'] = df['Label'].str.slice(start=-8, stop=-4).astype(int)
+        df['img_num'] = df['Label'].str.split('_')[-2][-4:].astype(int)
 
         # maximum value of rawData images 2-46
         FM = df.loc[
