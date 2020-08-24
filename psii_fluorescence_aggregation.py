@@ -120,7 +120,8 @@ def generate_aggregate(csv_list, thresh_path):
             continue
 
         # extracting image number from the label string and converting it to an int for filtering
-        concat_df['img_num'] = concat_df['Label'].str.split('_')[-2][-2:].astype(int)
+        #concat_df['img_num'] = int(str(concat_df['Label']).split('_')[-2][-2:])
+        #print(concat_df['img_num'])
         return concat_df
 
 
@@ -140,7 +141,7 @@ def generate_flurorescence(df):
             continue
 
         # extracting image number from the label string and converting it to an int for filtering
-        #df['img_num'] = df['Label'].str.split('_')[-2][-4:].astype(int)
+        df['img_num'] = df['Label'].str.slice(-16, -12).astype(int)
         
         # maximum value of rawData images 2-46
         FM = df.loc[
