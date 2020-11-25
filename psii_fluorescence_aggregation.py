@@ -28,7 +28,6 @@ def get_args():
     parser.add_argument('csv',
                         metavar='csv',
                         nargs='+',
-                        type=str,
                         help='A positional argument')
 
     parser.add_argument('-od',
@@ -52,11 +51,6 @@ def get_args():
                         type=str,
                         required=True,
                         default=None)
-
-    # parser.add_argument('-o',
-    #                     '--on',
-    #                     help='A boolean flag',
-    #                     action='store_true')
 
     return parser.parse_args()
 
