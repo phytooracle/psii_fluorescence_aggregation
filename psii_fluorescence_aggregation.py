@@ -27,7 +27,7 @@ def get_args():
 
     parser.add_argument('csv',
                         metavar='csv',
-                        nargs='+',
+                        #nargs='+',
                         help='A positional argument')
 
     parser.add_argument('-od',
