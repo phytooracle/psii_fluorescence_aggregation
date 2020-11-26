@@ -27,7 +27,7 @@ def get_args():
 
     parser.add_argument('csv',
                         metavar='csv',
-                        nargs='+',
+                        type=str,
                         help='A positional argument')
 
     parser.add_argument('-od',
@@ -169,9 +169,14 @@ def main():
     if not os.path.isdir(args.outdir):
         os.makedirs(args.outdir)
 
+    file_list = glob.glob(f'{args.csv}/*/*.csv')
+
+    if not file_list:
+        file_list = [args.csv]
+
     #print(args.csv)
     #csv_list = glob.glob(args.csv)
-    concat_df = generate_aggregate(args.csv, args.multithresh)
+    concat_df = generate_aggregate(file_list, args.multithresh)
     fluor_df = generate_flurorescence(concat_df)
 
     fluor_df.to_csv(os.path.join(args.outdir, args.outfile + '.csv'))
