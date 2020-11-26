@@ -27,7 +27,7 @@ def get_args():
 
     parser.add_argument('csv',
                         metavar='csv',
-                        #nargs='+',
+                        nargs='+',
                         help='A positional argument')
 
     parser.add_argument('-od',
@@ -135,8 +135,8 @@ def generate_flurorescence(df):
             continue
 
         # extracting image number from the label string and converting it to an int for filtering
-        df['img_num'] = df['Label'].str.slice(-16, -12).astype(int)
-        
+        df['img_num'] = df['Label'].str.slice(-8, -4).astype(int)
+
         # maximum value of rawData images 2-46
         FM = df.loc[
             (df['Plot'] == plot) &
@@ -168,9 +168,10 @@ def main():
 
     if not os.path.isdir(args.outdir):
         os.makedirs(args.outdir)
-        
-    img_list = glob.glob(args.csv)
-    concat_df = generate_aggregate(img_list, args.multithresh)
+
+    #print(args.csv)
+    #csv_list = glob.glob(args.csv)
+    concat_df = generate_aggregate(args.csv, args.multithresh)
     fluor_df = generate_flurorescence(concat_df)
 
     fluor_df.to_csv(os.path.join(args.outdir, args.outfile + '.csv'))
