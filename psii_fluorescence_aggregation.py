@@ -15,6 +15,7 @@ import sys
 import glob
 import json
 import pandas as pd
+import multiprocessing
 
 
 # --------------------------------------------------
@@ -56,27 +57,26 @@ def get_args():
 
 
 # --------------------------------------------------
-def generate_aggregate(csv_list, thresh_path):
+def generate_aggregate(csv):
+    args = get_args()
     to_concat = []
 
-    for csv in csv_list:
+    with open(args.multithresh) as f:
+        multithresh_list = json.loads(f.read())
 
-        with open(thresh_path) as f:
-            multithresh_list = json.loads(f.read())
+    df = pd.read_csv(csv).drop('Unnamed: 0', axis=1)
+    sorted_df = df.sort_values(['Label', 'Max'])
 
-        df = pd.read_csv(csv).drop('Unnamed: 0', axis=1)
-        sorted_df = df.sort_values(['Label', 'Max'])
+    try:
+        #sorted_df = df[['folder_name', 'Label', 'x', 'y', 'Area', 'Mean', 'Min', 'Max']]
+        sorted_df['MultiThr'] = multithresh_list
 
-        try:
-            #sorted_df = df[['folder_name', 'Label', 'x', 'y', 'Area', 'Mean', 'Min', 'Max']]
-            sorted_df['MultiThr'] = multithresh_list
-
-        except ValueError as e:
-            # the length of multithresh list does not match the amound of images taken.
-            # skip this
-            print(csv, e)
-            #continue
-        to_concat.append(sorted_df)
+    except ValueError as e:
+        # the length of multithresh list does not match the amound of images taken.
+        # skip this
+        print(csv, e)
+        #continue
+    to_concat.append(sorted_df)
 
     if to_concat:
         concat_df = pd.concat(to_concat)
@@ -176,7 +176,13 @@ def main():
 
     #print(args.csv)
     #csv_list = glob.glob(args.csv)
-    concat_df = generate_aggregate(file_list, args.multithresh)
+    concat_df = pd.DataFrame()
+
+    with multiprocessing.Pool(multiprocessing.cpu_count()) as p:
+        df = p.map(generate_aggregate, file_list)
+        #df = generate_aggregate(file_list, args.multithresh)
+        concat_df = concat_df.append(df)
+
     fluor_df = generate_flurorescence(concat_df)
 
     fluor_df.to_csv(os.path.join(args.outdir, args.outfile + '.csv'))
