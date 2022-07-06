@@ -6,7 +6,7 @@ Date   : 2020-08-23
         (see references). It was modified to allow for it's
         integration in a scalable data processing pipeline.**
 References: Jacob Long, Matthew Herritt, Alison Thompson
-Purpose: PS2 fluorescence aggregation
+Purpose: PSII fluorescence aggregation
 """
 
 import argparse
@@ -23,7 +23,7 @@ def get_args():
     """Get command-line arguments"""
 
     parser = argparse.ArgumentParser(
-        description='PS2 fluorescence aggregation',
+        description='PSII fluorescence aggregation',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('csv',
