@@ -59,63 +59,69 @@ def get_args():
 # --------------------------------------------------
 def generate_aggregate(csv):
     args = get_args()
-    to_concat = []
-
-    with open(args.multithresh) as f:
-        multithresh_list = json.loads(f.read())
-
-    df = pd.read_csv(csv).drop('Unnamed: 0', axis=1)
-    sorted_df = df.sort_values(['Label', 'Max'])
 
     try:
-        #sorted_df = df[['folder_name', 'Label', 'x', 'y', 'Area', 'Mean', 'Min', 'Max']]
-        sorted_df['MultiThr'] = multithresh_list
+        to_concat = []
 
-    except ValueError as e:
-        # the length of multithresh list does not match the amound of images taken.
-        # skip this
-        print(csv, e)
-        #continue
-    to_concat.append(sorted_df)
+        with open(args.multithresh) as f:
+            multithresh_list = json.loads(f.read())
 
-    if to_concat:
-        concat_df = pd.concat(to_concat)
+        df = pd.read_csv(csv).drop('Unnamed: 0', axis=1)
+        sorted_df = df.sort_values(['Label', 'Max'])
 
-    concat_df['AreaXMeanXMultiThr'] = concat_df['Area'] * concat_df['Mean'] * concat_df['MultiThr']
-
-    concat_df['AreaXMultiThr'] = concat_df['Area'] * concat_df['MultiThr']
-
-    for label in set(concat_df['Label']):
-            #print(label, end='\r')
-
-            # creating a list of true/false to tell
-            # which records to select from concat_df
-            chosen_records = concat_df['Label'] == label
-
-            # Sum(Area x Mean x Multithresh)
-            concat_df.loc[chosen_records, 'Sum AreaXMeanXMultiThr'] = concat_df.loc[chosen_records, 'AreaXMeanXMultiThr'].sum()
-
-            # Sum(Area x Multithresh)
-            concat_df.loc[chosen_records, 'Sum AreaXMultiThr'] = concat_df.loc[chosen_records, 'AreaXMultiThr'].sum()
-
-    concat_df['Sum_AreaXMeanXMultiThr_over_Sum_AreaXMultiThr'] = concat_df['Sum AreaXMeanXMultiThr'] / concat_df['Sum AreaXMultiThr']
-
-    for label in set(concat_df['Label']):
-
-        # the first value from the second picture
         try:
-            F0 = list(concat_df.loc[concat_df['Label'] == label, 'Sum_AreaXMeanXMultiThr_over_Sum_AreaXMultiThr'])
-            #print(F0)
-        except IndexError as e:
-            # an IndexError will be thrown if no records were found for a given plot.
-            # this could happen if the plot was not listed in the Plot boundaries.xlsx
-            # and the previous step has been run
-            print(f'No data found in plot {label}.', e)
-            continue
+            #sorted_df = df[['folder_name', 'Label', 'x', 'y', 'Area', 'Mean', 'Min', 'Max']]
+            sorted_df['MultiThr'] = multithresh_list
 
-        # extracting image number from the label string and converting it to an int for filtering
-        #concat_df['img_num'] = int(str(concat_df['Label']).split('_')[-2][-2:])
-        #print(concat_df['img_num'])
+        except ValueError as e:
+            # the length of multithresh list does not match the amound of images taken.
+            # skip this
+            print(csv, e)
+            #continue
+        to_concat.append(sorted_df)
+
+        if to_concat:
+            concat_df = pd.concat(to_concat)
+
+        concat_df['AreaXMeanXMultiThr'] = concat_df['Area'] * concat_df['Mean'] * concat_df['MultiThr']
+
+        concat_df['AreaXMultiThr'] = concat_df['Area'] * concat_df['MultiThr']
+
+        for label in set(concat_df['Label']):
+                #print(label, end='\r')
+
+                # creating a list of true/false to tell
+                # which records to select from concat_df
+                chosen_records = concat_df['Label'] == label
+
+                # Sum(Area x Mean x Multithresh)
+                concat_df.loc[chosen_records, 'Sum AreaXMeanXMultiThr'] = concat_df.loc[chosen_records, 'AreaXMeanXMultiThr'].sum()
+
+                # Sum(Area x Multithresh)
+                concat_df.loc[chosen_records, 'Sum AreaXMultiThr'] = concat_df.loc[chosen_records, 'AreaXMultiThr'].sum()
+
+        concat_df['Sum_AreaXMeanXMultiThr_over_Sum_AreaXMultiThr'] = concat_df['Sum AreaXMeanXMultiThr'] / concat_df['Sum AreaXMultiThr']
+
+        for label in set(concat_df['Label']):
+
+            # the first value from the second picture
+            try:
+                F0 = list(concat_df.loc[concat_df['Label'] == label, 'Sum_AreaXMeanXMultiThr_over_Sum_AreaXMultiThr'])
+                #print(F0)
+            except IndexError as e:
+                # an IndexError will be thrown if no records were found for a given plot.
+                # this could happen if the plot was not listed in the Plot boundaries.xlsx
+                # and the previous step has been run
+                print(f'No data found in plot {label}.', e)
+                continue
+
+            # extracting image number from the label string and converting it to an int for filtering
+            #concat_df['img_num'] = int(str(concat_df['Label']).split('_')[-2][-2:])
+            #print(concat_df['img_num'])
+            return concat_df
+    
+    except:
+        concat_df = pd.DataFrame()
         return concat_df
 
 
